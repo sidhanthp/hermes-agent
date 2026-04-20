@@ -55,9 +55,12 @@ RUN chmod -R a+rX /opt/hermes
 RUN uv venv && \
     uv pip install --no-cache-dir -e ".[all]"
 
+# Start the final container as root so the entrypoint can fix mounted volume
+# ownership on platforms like Railway, then drop privileges via gosu.
+USER root
+
 # ---------- Runtime ----------
 ENV HERMES_WEB_DIST=/opt/hermes/hermes_cli/web_dist
 ENV HERMES_HOME=/opt/data
 ENV PATH="/opt/data/.local/bin:${PATH}"
-VOLUME [ "/opt/data" ]
 ENTRYPOINT [ "/usr/bin/tini", "-g", "--", "/opt/hermes/docker/entrypoint.sh" ]
